@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { announcements as initialAnnouncements, user } from "@/lib/data";
+import { announcements as initialAnnouncements, allUsers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 type Announcement = {
@@ -35,6 +36,10 @@ type Announcement = {
 };
 
 export default function AnnouncementsPage() {
+  const searchParams = useSearchParams();
+  const regId = searchParams.get('regId');
+  const user = allUsers.find(u => u.regId === regId);
+
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "" });
@@ -45,6 +50,15 @@ export default function AnnouncementsPage() {
       toast({
         title: "Error",
         description: "Title and content cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Could not identify the user. Please log in again.",
         variant: "destructive",
       });
       return;
